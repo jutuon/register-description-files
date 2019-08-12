@@ -1,0 +1,740 @@
+[register_description]
+version = "0.1"
+name = "VGA"
+description = """
+VGA Registers
+
+Register information is from
+* [Intel® OpenSource HD Graphics Programmer’s Reference Manual (PRM) Volume 3 Part 1: VGA and Extended VGA Registers (Ivy Bridge)](https://01.org/sites/default/files/documentation/ivb_ihd_os_vol3_part1_0.pdf)
+* [IBM Personal System/2® Hardware Interface Technical Reference](http://classiccomputers.info/down/IBM_PS2/documents/PS2_Hardware_Interface_Technical_Reference_May88.pdf)
+    * Video Subsystem chapter starts from PDF page 388.
+
+Register addresses which depend on IO Address Select bit in the Miscellaneous
+Output register are defined as relative. These relative addresses can be
+used as is when IO Address Select bit is clear. When bit is set add 0x20 to
+the address before accessing the register with it. This converts the second
+hexadecimal digit from B to D.
+"""
+default_register_size = "8"
+default_register_access = "rw"
+index_size = "8"
+address_size = "16"
+
+# General Registers
+
+[[register.general]]
+name = "MSR"
+description = "Miscellaneous Output Register"
+absolute_address = 0x3CC
+absolute_address_w = 0x3C2
+bit_fields = [
+    { bit = "7:6",  name = "Vertical And Horizontal Sync Polarity", description = "Bit 7 is Vertical Sync Polarity and bit 6 is Horizontal Sync Polarity." },
+    { bit = "5:4",  reserved = true },
+    { bit = "3:2",  name = "Clock Select" },
+    { bit = "1",    name = "Enable RAM" },
+    { bit = "0",    name = "IO Address Select"},
+]
+
+[[register.general.enum]]
+name = "Vertical Size"
+bit = "7:6"
+values = [
+    { value = 0, name = "Reserved" },
+    { value = 1, name = "Lines 400" },
+    { value = 2, name = "Lines 350" },
+    { value = 3, name = "Lines 480" },
+]
+
+[[register.general.enum]]
+name = "Clock Select"
+bit = "3:2"
+values = [
+    { value = 0, name = "Select25", description = "Selects 25.175 MHz clock for 640/320 Horizontal PELs" },
+    { value = 1, name = "Select28", description = "Selects 28.322 MHz clock for 720/360 Horizontal PELs" },
+    { value = 2, name = "ExternalClock", description = "Selects External Clock" },
+    { value = 3, name = "Reserved"},
+]
+
+[[register.general]]
+name = "ST00"
+description = "Input Status 0"
+absolute_address = 0x3C2
+access = "r"
+bit_fields = [
+    { bit = "7", name = "CRT Interrupt" },
+    { bit = "6:5", reserved = true },
+    { bit = "4", name = "Switch Sense Bit" },
+    { bit = "3:0", reserved = true },
+]
+
+[[register.general]]
+name = "ST01"
+description = "Input Status 1"
+access = "r"
+relative_address = 0x3DA
+bit_fields = [
+    { bit = "7:4", reserved = true },
+    { bit = "3", name = "Vertical Retrace" },
+    { bit = "2:1", reserved = true },
+    { bit = "0", name = "Display Enable" },
+]
+
+[[register.general]]
+name = "FCR"
+description = "Feature Control"
+absolute_address = 0x3CA
+relative_address_w = 0x3BA
+bit_fields = [
+    { bit = "7:0", reserved = true }
+]
+
+[[register.general]]
+name = "Video Subsystem Enable"
+absolute_address = 0x3C3
+bit_fields = [
+    { bit = "7:1", reserved = true },
+    { bit = "0", name = "Video Subsystem Enable" },
+]
+
+# Sequencer Registers
+
+[[register.sequencer]]
+name = "SRX"
+description = "Sequencer Index"
+absolute_address = 0x3C4
+bit_fields = [
+    { bit = "7:3", reserved = true },
+    { bit = "2:0", name = "Sequencer Index" },
+]
+
+[[register.sequencer]]
+name = "SR00"
+description = "Sequencer Reset"
+index = 0
+bit_fields = [
+    { bit = "7:2",  reserved = true },
+    { bit = "1",    name = "Synchronous Reset" },
+    { bit = "0",    name = "Asynchronous Reset" },
+]
+
+[[register.sequencer]]
+name = "SR01"
+description = "Clocking Mode"
+index = 1
+bit_fields = [
+    { bit = "7:6", reserved = true },
+    { bit = "5", name = "Screen Off" },
+    { bit = "4", name = "Shift 4" },
+    { bit = "3", name = "Dot Clock" },
+    { bit = "2", name = "Shift Load" },
+    { bit = "1", reserved = true },
+    { bit = "0", name = "Dot Clocks 8 Slash 9" },
+]
+
+[[register.sequencer]]
+name = "SR02"
+description = "Plane/Map Mask"
+index = 2
+bit_fields = [
+    { bit = "7:4", reserved = true },
+    { bit = "3", name = "Map 3 Enable" },
+    { bit = "2", name = "Map 2 Enable" },
+    { bit = "1", name = "Map 1 Enable" },
+    { bit = "0", name = "Map 0 Enable" },
+]
+
+[[register.sequencer]]
+name = "SR03"
+description = "Character Font"
+index = 3
+bit_fields = [
+    { bit = "7:6", reserved = true },
+    { bit = "5", name = "Map A Select MSB" },
+    { bit = "4", name = "Map B Select MSB" },
+    { bit = "3:2", name = "Map A Select" },
+    { bit = "1:0", name = "Map B Select" },
+]
+
+[[register.sequencer]]
+name = "SR04"
+description = "Memory Mode Register"
+index = 4
+bit_fields = [
+    { bit = "7:4", reserved = true },
+    { bit = "3", name = "Chain 4 Mode" },
+    { bit = "2", name = "Odd Slash Even Mode" },
+    { bit = "1", name = "Extended Memory Enable" },
+    { bit = "0", reserved = true },
+]
+
+[[register.sequencer]]
+name = "SR07"
+description = "Horizontal Character Counter Reset"
+index = 7
+bit_fields = [
+    { bit = "7:0", name = "Horizontal Character Counter" }
+]
+
+# CRT Controller
+
+[[register.crt_controller]]
+name = "CRX"
+description = "CRT Controller Index Register"
+relative_address = 0x3B4
+bit_fields = [
+    { bit = "7:5", reserved = true },
+    { bit = "4:0", name = "CRT Controller Index" }
+]
+
+[[register.crt_controller]]
+name = "CR00"
+description = "Horizontal Total Register"
+index = 0
+bit_fields = [
+    { bit = "7:0", name = "Horizontal Total" },
+]
+
+[[register.crt_controller]]
+name = "CR01"
+description = "Horizontal Display Enable End Register"
+index = 1
+bit_fields = [
+    { bit = "7:0", name = "Horizontal Display Enable End" },
+]
+
+[[register.crt_controller]]
+name = "CR02"
+description = "Horizontal Blanking Start Register"
+index = 2
+bit_fields = [
+    { bit = "7:0", name = "Horizontal Blanking Start" },
+]
+
+[[register.crt_controller]]
+name = "CR03"
+description = "Horizontal Blanking End Register"
+index = 3
+bit_fields = [
+    { bit = "7", reserved = true },
+    { bit = "6:5", name = "Display Enable Skew Control" },
+    { bit = "4:0", name = "Horizontal Blanking End bits from 0 to 4", description = "Part 1/2 of a 6-bit value." },
+]
+
+[[register.crt_controller.enum]]
+name = "SkewControl"
+description = "Amount of skew."
+bit = "6:5"
+values = [
+    { value = 0, name = "Zero", description = "No character clock skew." },
+    { value = 1, name = "One", description = "One character clock skew." },
+    { value = 2, name = "Two", description = "Two character clock skew." },
+    { value = 3, name = "Three", description = "Three character clock skew." },
+]
+
+[[register.crt_controller]]
+name = "CR04"
+description = "Horizontal Sync Start Register"
+index = 4
+bit_fields = [
+    { bit = "7:0", name = "Horizontal Sync Start" },
+]
+
+[[register.crt_controller]]
+name = "CR05"
+description = "Horizontal Sync End Register"
+index = 5
+bit_fields = [
+    { bit = "7", name = "Horizontal Blanking End Bit 5", description = "Part 2/2 of a 6-bit value." },
+    { bit = "6:5", name = "Horizontal Sync Delay" },
+    { bit = "4:0", name = "Horizontal Sync End" },
+]
+
+[[register.crt_controller]]
+name = "CR06"
+description = "Vertical Total Register"
+index = 6
+bit_fields = [
+    { bit = "7:0", name = "Vertical Total bits from 0 to 7", description = "Part 1/3 of a 10-bit value." },
+]
+
+[[register.crt_controller]]
+name = "CR07"
+description = "Overflow Register"
+index = 7
+bit_fields = [
+    { bit = "7", name = "Vertical Sync Start Bit 9", description = "Part 3/3 of a 10-bit value." },
+    { bit = "6", name = "Vertical Display Enable End Bit 9", description = "Part 3/3 of a 10-bit value." },
+    { bit = "5", name = "Vertical Total Bit 9", description = "Part 3/3 of a 10-bit value." },
+    { bit = "4", name = "Line Compare Bit 8", description = "Part 2/3 of a 10-bit value." },
+    { bit = "3", name = "Vertical Blanking Start Bit 8", description = "Part 2/3 of a 10-bit value." },
+    { bit = "2", name = "Vertical Sync Start Bit 8", description = "Part 2/3 of a 10-bit value." },
+    { bit = "1", name = "Vertical Display Enable End Bit 8", description = "Part 2/3 of a 10-bit value." },
+    { bit = "0", name = "Vertical Total Bit 8", description = "Part 2/3 of a 10-bit value." },
+]
+
+[[register.crt_controller]]
+name = "CR08"
+description = "Preset Row Scan Register"
+index = 8
+bit_fields = [
+    { bit = "7", reserved = true },
+    { bit = "6:5", name = "Byte Panning" },
+    { bit = "4:0", name = "Starting Row Scan Count" },
+]
+
+[[register.crt_controller.enum]]
+name = "Byte Panning Mode"
+bit = "6:5"
+values = [
+    { value = 0, name = "Zero" },
+    { value = 1, name = "One" },
+    { value = 2, name = "Two" },
+    { value = 3, name = "Three" },
+]
+
+[[register.crt_controller]]
+name = "CR09"
+description = "Maximum Scan Line Register"
+index = 9
+bit_fields = [
+    { bit = "7", name = "Double Scanning Enable" },
+    { bit = "6", name = "Line Compare Bit 9", description = "Part 3/3 of a 10-bit value." },
+    { bit = "5", name = "Vertical Blanking Start Bit 9", description = "Part 3/3 of a 10-bit value." },
+    { bit = "4:0", name = "Starting Row Scan Count" },
+]
+
+[[register.crt_controller]]
+name = "CR0A"
+description = "Text Cursor Start Register"
+index = 0xA
+bit_fields = [
+    { bit = "7:6", reserved = true },
+    { bit = "5", name = "Text Cursor Off" },
+    { bit = "4:0", name = "Text Cursor Start" },
+]
+
+[[register.crt_controller]]
+name = "CR0B"
+description = "Text Cursor End Register"
+index = 0xB
+bit_fields = [
+    { bit = "7", reserved = true },
+    { bit = "6:5", name = "Text Cursor Skew" },
+    { bit = "4:0", name = "Text Cursor End" },
+]
+
+[[register.crt_controller.enum]]
+name = "Text Cursor Skew"
+bit = "6:5"
+values = [
+    { value = 0, name = "Zero", description = "No delay." },
+    { value = 1, name = "One", description = "Delayed by 1 character clock." },
+    { value = 2, name = "Two", description = "Delayed by 2 character clocks." },
+    { value = 3, name = "Three", description = "Delayed by 3 character clock." },
+]
+
+[[register.crt_controller]]
+name = "CR0C"
+description = "Start Address High Register"
+index = 0xC
+bit_fields = [
+    { bit = "7:0", name = "Start Address High Byte", description = "Part 2/2 of a 16-bit value." },
+]
+
+[[register.crt_controller]]
+name = "CR0D"
+description = "Start Address Low Register"
+index = 0xD
+bit_fields = [
+    { bit = "7:0", name = "Start Address Low Byte", description = "Part 1/2 of a 16-bit value." },
+]
+
+[[register.crt_controller]]
+name = "CR0E"
+description = "Text Cursor Location High Register"
+index = 0xE
+bit_fields = [
+    { bit = "7:0", name = "Text Cursor Location High Byte", description = "Part 2/2 of a 16-bit value." },
+]
+
+[[register.crt_controller]]
+name = "CR0F"
+description = "Text Cursor Location Low Register"
+index = 0xF
+bit_fields = [
+    { bit = "7:0", name = "Text Cursor Location Low Byte", description = "Part 1/2 of a 16-bit value." },
+]
+
+[[register.crt_controller]]
+name = "CR10"
+description = "Vertical Sync Start Register"
+index = 0x10
+bit_fields = [
+    { bit = "7:0", name = "Vertical Sync Start bits from 0 to 7", description = "Part 1/3 of a 10-bit value." },
+]
+
+[[register.crt_controller]]
+name = "CR11"
+description = "Vertical Sync End Register"
+index = 0x11
+bit_fields = [
+    { bit = "7", name = "Protect Registers from 0 to 7" },
+    { bit = "6", name = "Select 5 Refresh Cycles" },
+    { bit = "5", name = "Vertical Interrupt Enable" },
+    { bit = "4", name = "Vertical Interrupt Clear" },
+    { bit = "3:0", name = "Vertical Sync End" },
+]
+
+[[register.crt_controller]]
+name = "CR12"
+description = "Vertical Display Enable End Register"
+index = 0x12
+bit_fields = [
+    { bit = "7:0", name = "Vertical Display Enable End bits from 0 to 7", description = "Part 1/3 of a 10-bit value." },
+]
+
+[[register.crt_controller]]
+name = "CR13"
+description = "Offset Register"
+index = 0x13
+bit_fields = [
+    { bit = "7:0", name = "Offset Bits" },
+]
+
+[[register.crt_controller]]
+name = "CR14"
+description = "Underline Location Register"
+index = 0x14
+bit_fields = [
+    { bit = "7", reserved = true },
+    { bit = "6", name = "DWord Mode" },
+    { bit = "5", name = "Count By 4" },
+    { bit = "4:0", name = "Start Underline" },
+]
+
+[[register.crt_controller]]
+name = "CR15"
+description = "Vertical Blanking Start Register"
+index = 0x15
+bit_fields = [
+    { bit = "7:0", name = "Vertical Blanking Start bits from 0 to 7", description = "Part 1/3 of a 10-bit value." },
+]
+
+[[register.crt_controller]]
+name = "CR16"
+description = "Vertical Blanking End Register"
+index = 0x16
+bit_fields = [
+    { bit = "7:0", name = "Vertical Blanking End" },
+]
+
+[[register.crt_controller]]
+name = "CR17"
+description = "CRT Mode Control"
+index = 0x17
+bit_fields = [
+    { bit = "7", name = "CRT Controller Reset" },
+    { bit = "6", name = "Word Mode or Byte Mode" },
+    { bit = "5", name = "Address Warp" },
+    { bit = "4", reserved = true },
+    { bit = "3", name = "Count By 2" },
+    { bit = "2", name = "Horizontal Retrace Select" },
+    { bit = "1", name = "Select Row Scan Counter" },
+    { bit = "0", name = "Compatibility Mode Support" },
+]
+
+[[register.crt_controller]]
+name = "CR18"
+description = "Line Compare Register"
+index = 0x18
+bit_fields = [
+    { bit = "7:0", name = "Line Compare Target bits from 0 to 7", description = "Part 1/3 of a 10-bit value." },
+]
+
+# Graphics Controller
+
+[[register.graphics_controller]]
+name = "GRX"
+description = "Graphics Controller Index Register"
+absolute_address = 0x3CE
+bit_fields = [
+    { bit = "7:4", reserved = true },
+    { bit = "3:0", name = "Graphics Controller Register Index", description = "Graphics controller register index." },
+]
+
+[[register.graphics_controller]]
+name = "GR00"
+description = "Set/Reset Register"
+index = 0
+bit_fields = [
+    { bit = "7:4", reserved = true },
+    { bit = "3:0", name = "Set Slash Reset Plane" },
+]
+
+[[register.graphics_controller]]
+name = "GR01"
+description = "Enable Set/Reset Register"
+index = 1
+bit_fields = [
+    { bit = "7:4", reserved = true },
+    { bit = "3:0", name = "Enable Set Slash Reset Plane" },
+]
+
+[[register.graphics_controller]]
+name = "GR02"
+description = "Color Compare Register"
+index = 2
+bit_fields = [
+    { bit = "7:4", reserved = true },
+    { bit = "3:0", name = "Color Compare Plane" },
+]
+
+[[register.graphics_controller]]
+name = "GR03"
+description = "Data Rotate Register"
+index = 3
+bit_fields = [
+    { bit = "7:5", reserved = true },
+    { bit = "4:3", name = "Function Select" },
+    { bit = "2:0", name = "Rotate count" },
+]
+
+[[register.graphics_controller.enum]]
+name = "FunctionSelectMode"
+bit = "4:3"
+values = [
+    { value = 0, name = "Zero" },
+    { value = 1, name = "One" },
+    { value = 2, name = "Two" },
+    { value = 3, name = "Three" },
+]
+
+[[register.graphics_controller]]
+name = "GR04"
+description = "Read Plane Select Register"
+index = 4
+bit_fields = [
+    { bit = "7:2", reserved = true },
+    { bit = "1:0", name = "Read Plane Select" },
+]
+
+[[register.graphics_controller.enum]]
+name = "PlaneSelect"
+bit = "1:0"
+values = [
+    { value = 0, name = "Plane 0" },
+    { value = 1, name = "Plane 1" },
+    { value = 2, name = "Plane 2" },
+    { value = 3, name = "Plane 3" },
+]
+
+[[register.graphics_controller]]
+name = "GR05"
+description = "Graphics Mode Register"
+index = 5
+bit_fields = [
+    { bit = "7", reserved = true },
+    { bit = "6:5", name = "Shift Register Control" },
+    { bit = "4", name = "Odd Slash Even Mode" },
+    { bit = "3", name = "Read Mode" },
+    { bit = "2", reserved = true },
+    { bit = "1:0", name = "Write Mode" },
+]
+
+[[register.graphics_controller.enum]]
+name = "Write Mode"
+bit = "1:0"
+values = [
+    { value = 0, name = "Mode 0" },
+    { value = 1, name = "Mode 1" },
+    { value = 2, name = "Mode 2" },
+    { value = 3, name = "Mode 3" },
+]
+
+[[register.graphics_controller]]
+name = "GR06"
+description = "Miscellaneous Register"
+index = 6
+bit_fields = [
+    { bit = "7:4", reserved = true },
+    { bit = "3:2", name = "Memory Map Mode" },
+    { bit = "1", name = "Chain Odd Slash Even" },
+    { bit = "0", name = "Graphics Slash Text Mode" },
+]
+
+[[register.graphics_controller.enum]]
+name = "Memory Map Mode"
+bit = "3:2"
+values = [
+    { value = 0, name = "Mode 0", description = "0xA0000 - 0xBFFFF" },
+    { value = 1, name = "Mode 1", description = "0xA0000 - 0xAFFFF" },
+    { value = 2, name = "Mode 2", description = "0xB0000 - 0xB7FFF" },
+    { value = 3, name = "Mode 3", description = "0xB8000 - 0xBFFFF" },
+]
+
+[[register.graphics_controller.enum]]
+name = "Graphics Slash Text Mode"
+bit = "0"
+values = [
+    { value = 0, name = "Text" },
+    { value = 1, name = "Graphics" },
+]
+
+[[register.graphics_controller]]
+name = "GR07"
+description = "Color Don't Care Register"
+index = 7
+bit_fields = [
+    { bit = "7:4", reserved = true },
+    { bit = "3", name = "Ignore Color Plane 3" },
+    { bit = "2", name = "Ignore Color Plane 2" },
+    { bit = "1", name = "Ignore Color Plane 1" },
+    { bit = "0", name = "Ignore Color Plane 0" },
+]
+
+[[register.graphics_controller]]
+name = "GR08"
+description = "Bit Mask Register"
+index = 8
+bit_fields = [
+    { bit = "7:0", name = "Bit Mask" },
+]
+
+# Attribute Controller
+
+[[register.attribute_controller]]
+name = "ARX"
+description = "Attribute Controller Index Register"
+absolute_address = 0x3C1
+absolute_address_w = 0x3C0
+bit_fields = [
+    { bit = "7:6", reserved = true },
+    { bit = "5", name = "Video Enable" },
+    { bit = "4:0", name = "Attribute Controller Register Index" },
+]
+
+[[register.attribute_controller]]
+name = "AR00"
+description = """
+Palette Register 0
+
+Total number of palette registers is 16.
+These registers have indexes from 0x0 to 0xF.
+"""
+index = 0
+bit_fields = [
+    { bit = "7:6", reserved = true },
+    { bit = "5:0", name = "Palette Bits" },
+]
+
+[[register.attribute_controller]]
+name = "AR10"
+description = "Mode Control Register"
+index = 0x10
+bit_fields = [
+    { bit = "7", name = "Palette Bits P5 P4 Select" },
+    { bit = "6", name = "Pixel Width Slash Clock Select" },
+    { bit = "5", name = "Pixel Panning Compatibility" },
+    { bit = "4", reserved = true },
+    { bit = "3", name = "Enable Blinking Slash Select Background Intensity" },
+    { bit = "2", name = "Enable Line Graphics Character Code" },
+    { bit = "1", name = "Select Display Type" },
+    { bit = "0", name = "Graphics Slash Alphanumeric Mode" },
+]
+
+[[register.attribute_controller.enum]]
+name = "Graphics Slash Alphanumeric Mode"
+bit = "0"
+values = [
+    { value = 0, name = "Alphanumeric Mode" },
+    { value = 1, name = "Graphics Mode" },
+]
+
+[[register.attribute_controller]]
+name = "AR12"
+description = "Memory Plane Enable Register"
+index = 0x12
+bit_fields = [
+    { bit = "7:4", reserved = true },
+    { bit = "3", name = "Enable Plane 3" },
+    { bit = "2", name = "Enable Plane 2" },
+    { bit = "1", name = "Enable Plane 1" },
+    { bit = "0", name = "Enable Plane 0" },
+]
+
+[[register.attribute_controller]]
+name = "AR13"
+description = "Horizontal Pixel Panning Register"
+index = 0x13
+bit_fields = [
+    { bit = "7:4", reserved = true },
+    { bit = "3:0", name = "Horizontal Pixel Shift" },
+]
+
+[[register.attribute_controller]]
+name = "AR14"
+description = "Color Select Register"
+index = 0x14
+bit_fields = [
+    { bit = "7:4", reserved = true },
+    { bit = "3", name = "Palette Bit 7" },
+    { bit = "2", name = "Palette Bit 6" },
+    { bit = "1", name = "Alternate Palette Bit 5" },
+    { bit = "0", name = "Alternate Palette Bit 4" },
+]
+
+# Color Palette Registers
+
+[[register.color_palette]]
+name = "DACMASK"
+description = "Pixel Data Mask Register"
+absolute_address = 0x3C6
+bit_fields = [
+    { bit = "7:0", name = "Pixel Data Mask" },
+]
+
+[[register.color_palette]]
+name = "DACSTATE"
+description = "DAC State Register"
+access = "r"
+absolute_address = 0x3C7
+bit_fields = [
+    { bit = "7:2", reserved = true },
+    { bit = "1:0", name = "DAC State" },
+]
+
+[[register.color_palette.enum]]
+name = "DAC State"
+bit = "1:0"
+values = [
+    { value = 0, name = "Palette Write Index Register" },
+    { value = 1, name = "Reserved 1" },
+    { value = 2, name = "Reserved 2" },
+    { value = 3, name = "Palette Read Index Register" },
+]
+
+[[register.color_palette]]
+name = "DACRX"
+description = "Palette Read Index Register"
+access = "w"
+absolute_address = 0x3C7
+bit_fields = [
+    { bit = "7:0", name = "Palette Read Index" },
+]
+
+[[register.color_palette]]
+name = "DACWX"
+description = "Palette Write Index Register"
+access = "w"
+absolute_address = 0x3C8
+bit_fields = [
+    { bit = "7:0", name = "Palette Write Index" },
+]
+
+[[register.color_palette]]
+name = "DACDATA"
+description = "Palette Data Register"
+absolute_address = 0x3C9
+bit_fields = [
+    { bit = "7:0", name = "Palette Data" },
+]
