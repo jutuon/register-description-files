@@ -605,8 +605,7 @@ bit_fields = [
 [[register.attribute_controller]]
 name = "ARX"
 description = "Attribute Controller Index Register"
-absolute_address = 0x3C1
-absolute_address_w = 0x3C0
+absolute_address = 0x3C0
 bit_fields = [
     { bit = "7:6", reserved = true },
     { bit = "5", name = "Video Enable" },
